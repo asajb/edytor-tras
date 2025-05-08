@@ -1,0 +1,103 @@
+<html>
+  <head>
+    <style>
+      /* Reuse map styling */
+      #map-container {
+        position: relative;
+        margin-top: 20px;
+        text-align: center;
+        width: 80vw;
+        height: 80vh;
+        margin: auto;
+      }
+      #map-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .overlay {
+        position: absolute;
+        background: rgba(255,255,255,0.8);
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      #coordinate-overlay { top: 5px; left: 5px; }
+      #right-top-overlay { top: 5px; right: 5px; }
+      #left-bottom-overlay { bottom: 5px; left: 5px; }
+      #max-coordinate-overlay { bottom: 5px; right: 5px; }
+      table {
+        margin-top: 20px;
+        border-collapse: collapse;
+      }
+      td, th {
+        padding: 8px;
+        border: 1px solid #ccc;
+      }
+      .delete-checkbox {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Edit Route: {{ route.name }}</h1>
+    {% if route.background %}
+    <div id="map-container">
+      <img src="{{ route.background.image.url }}" alt="Map Background">
+      <!-- Overlays -->
+      <div id="coordinate-overlay" class="overlay">Origin (0,0)</div>
+      <div id="right-top-overlay" class="overlay">( {{ route.background.image.width }}, 0 )</div>
+      <div id="left-bottom-overlay" class="overlay">( 0, {{ route.background.image.height }} )</div>
+      <div id="max-coordinate-overlay" class="overlay">Max ({{ route.background.image.width }}, {{ route.background.image.height }})</div>
+    </div>
+    {% endif %}
+    
+    <h2>Edit Route Points</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {% if formset.non_form_errors %}
+        <div style="color: red;">
+            {{ formset.non_form_errors }}
+        </div>
+        {% endif %}
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>X Coordinate</th>
+                    <th>Y Coordinate</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        {{ form.id }}  <!-- Add hidden ID field -->
+                        {{ form.x }}
+                        {% if form.x.errors %}
+                        <div style="color: red;">{{ form.x.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ form.y }}
+                        {% if form.y.errors %}
+                        <div style="color: red;">{{ form.y.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if form.DELETE %}
+                            {{ form.DELETE }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Update Route</button>
+    </form>
+  </body>
+</html>

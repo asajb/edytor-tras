@@ -1,0 +1,130 @@
+<html>
+  <head>
+    <style>
+      #map-container {
+        position: relative;
+        margin-top: 20px;
+        text-align: center;
+        width: 80vw;
+        height: 80vh;
+        margin: auto;
+      }
+      #map-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      /* Overlay style for origin (top left) */
+      #coordinate-overlay {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background: rgba(255,255,255,0.8);
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      /* Overlay style for right top coordinates */
+      #right-top-overlay {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255,255,255,0.8);
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      /* Overlay style for left bottom coordinates */
+      #left-bottom-overlay {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        background: rgba(255,255,255,0.8);
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      /* Overlay style for max (bottom right) */
+      #max-coordinate-overlay {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: rgba(255,255,255,0.8);
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      form {
+        margin-top: 20px;
+      }
+      table {
+        margin-top: 10px;
+      }
+      td {
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Create Route</h1>
+    {% if background %}
+    <div id="map-container">
+      <img src="{{ background.image.url }}" alt="Map Background">
+      <!-- Overlays -->
+      <div id="coordinate-overlay">Origin (0,0)</div>
+      <div id="right-top-overlay">( {{ background.image.width }}, 0 )</div>
+      <div id="left-bottom-overlay">( 0, {{ background.image.height }} )</div>
+      <div id="max-coordinate-overlay">Max ({{ background.image.width }}, {{ background.image.height }})</div>
+    </div>
+    {% endif %}
+    <!-- Route creation form -->
+    <form method="POST" action="?bg={{ background.id }}">
+      {% csrf_token %}
+      {{ route_form.as_p }}
+      <h3>Route Points: (Enter coordinates)</h3>
+      {{ formset.management_form }}
+      <table>
+        <tbody id="formset-table-body">
+          {% for form in formset %}
+          <tr>
+            <td>{{ form.x.label_tag }} {{ form.x }}</td>
+            <td>{{ form.y.label_tag }} {{ form.y }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <button type="button" id="add-point">Add Point</button>
+      <br/><br/>
+      <button type="submit">Create Route</button>
+    </form>
+    <!-- Hidden empty form template -->
+    <div id="empty-form" style="display:none;">
+      <tr>
+        <td>{{ formset.empty_form.x.label_tag }} {{ formset.empty_form.x }}</td>
+        <td>{{ formset.empty_form.y.label_tag }} {{ formset.empty_form.y }}</td>
+      </tr>
+    </div>
+    <script>
+      // Grab the management form TOTAL_FORMS input
+      var totalForms = document.getElementById("id_form-TOTAL_FORMS");
+      var formIdx = parseInt(totalForms.value);
+      
+      document.getElementById("add-point").addEventListener("click", function(e) {
+        // Get the empty form template and replace __prefix__ with formIdx
+        var emptyTemplate = document.getElementById("empty-form").innerHTML;
+        var newRowHtml = emptyTemplate.replace(/__prefix__/g, formIdx);
+        // Append the new row to the table body
+        var newRow = document.createElement("tr");
+        newRow.innerHTML = newRowHtml;
+        document.getElementById("formset-table-body").appendChild(newRow);
+        // Increase form count
+        formIdx++;
+        totalForms.value = formIdx;
+      });
+    </script>
+  </body>
+</html>
