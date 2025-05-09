@@ -50,8 +50,17 @@
            border: 1px solid #000;
            background-color: #eee;
            text-decoration: none;
-           margin-left: 20px;">Edit Route</a>
-      </h1>
+           margin-left: 20px;">Edit Route
+        </a>
+        <a href="{% url 'delete_route' route.id %}" style="
+          font-size: 16px;
+          padding: 8px 16px;
+          border: 1px solid #f00;
+          background-color: #fdd;
+          text-decoration: none;
+          margin-left: 10px;">Delete Route
+        </a>
+    </h1>
     {% if route.background %}
     <div id="map-container">
       <img src="{{ route.background.image.url }}" alt="Map Background">

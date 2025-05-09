@@ -1,0 +1,11 @@
+<html>
+  <body>
+    <h1>Confirm deletion</h1>
+    <p>Are you sure you want to delete the route "{{ route.name }}"?</p>
+    <form method="POST">
+      {% csrf_token %}
+      <button type="submit">Yes, delete</button>
+      <a href="{% url 'route_detail' route.id %}">Cancel</a>
+    </form>
+  </body>
+</html>

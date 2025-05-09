@@ -23,3 +23,4 @@ class RoutePoint(models.Model):
 
     def __str__(self):
         return f"Point {self.order} ({self.x}, {self.y})"
+    

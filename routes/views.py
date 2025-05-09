@@ -80,3 +80,11 @@ def edit_route(request, route_id):
         'route': route,
         'formset': formset
     })
+
+@login_required
+def delete_route(request, route_id):
+    route = get_object_or_404(Route, id=route_id, user=request.user)
+    if request.method == "POST":
+        route.delete()
+        return redirect('')  # e.g. redirect to homepage or user's routes list
+    return render(request, 'routes/confirm_delete.html', {'route': route})
