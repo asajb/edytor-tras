@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>List of Grids</title>
+  </head>
+  <body>
+    <h1>My Grids</h1>
+    <ul>
+      {% for grid in grids %}
+        <li>
+          <a href="{% url 'edit_grid' grid.id %}">{{ grid.title }}</a>
+          by {{ grid.user.username }}
+          ({{ grid.rows }} x {{ grid.cols }})
+          <a href="{% url 'make_paths_on_grid' grid.id %}">Make Paths</a>
+        </li>
+      {% empty %}
+        <li>No grids found.</li>
+      {% endfor %}
+    </ul>
+    <a href="{% url 'create_grid' %}">Create New Grid</a>
+
+    <h2>My Paths on Boards</h2>
+    <ul>
+      {% for path_on_board in paths %}
+        <li>
+          <a href="{% url 'show_paths_on_grid' path_on_board.board.id path_on_board.id %}">
+            {{ path_on_board }}  <!-- or path_on_board.title if you have -->
+          </a>
+          by {{ path_on_board.user.username }}
+        </li>
+      {% empty %}
+        <li>No paths on boards found.</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+{% load static %}
+<html>
+  <head>
+    <title>Show Paths on Grid - {{ grid.title }}</title>
+    <style>
+      table.grid {
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      table.grid td {
+        width: 50px;
+        height: 50px;
+        border: 1px solid #ccc;
+        text-align: center;
+        vertical-align: middle;
+        position: relative; /* needed for absolute children */
+      }
+      .path-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        z-index: 1;
+        pointer-events: none;
+      }
+      .dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+      }
+      .legend {
+        margin: 20px 0;
+      }
+      .legend-item {
+        display: inline-block;
+        margin-right: 20px;
+      }
+      .legend-dot {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Paths on Grid: {{ grid.title }}</h1>
+    
+    <div class="legend">
+      <h3>Path Legend:</h3>
+      {% for path in paths_on_board.paths.all %}
+        {% with c=path.starting_dot.color %}
+          <div class="legend-item">
+            <span class="legend-dot" style="background-color: {{ c }};"></span>
+            Path {{ forloop.counter }}
+          </div>
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+    <table class="grid">
+      {% for row in grid_cells %}
+        <tr>
+          {% for cell in row %}
+            <td>
+              {% if cell %}
+                <div class="path-bg" style="background-color: {{ cell.color }};"></div>
+              {% endif %}
+
+              {% for dot in grid.dots %}
+                {% comment %} entire condition must be on one line {% endcomment %}
+                {% if dot.row == forloop.parentloop.parentloop.counter0 and dot.col == forloop.parentloop.counter0 %}
+                  <div class="dot" style="background-color: {{ dot.color }};"></div>
+                {% endif %}
+              {% endfor %}
+
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+
+    <div>
+      <a href="{% url 'list_grids' %}">Back to Grids</a>
+    </div>
+  </body>
+</html>

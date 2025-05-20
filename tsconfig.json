@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "ES6",
+        "sourceMap": true,
+        "outDir": "./dist"
+    },
+    "include": [
+        "src/**/*"
+, "routes/static/js/dynamicPointsAdd.js", "routes/static/js/dynamicPointsAdd.js"    ]
+}

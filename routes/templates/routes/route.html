@@ -79,7 +79,10 @@
     <h2>Route Points</h2>
     <ul>
       {% for point in points %}
-      <li>Point {{ forloop.counter }}: ({{ point.x }}, {{ point.y }})</li>
+      <li>
+        Point {{ forloop.counter }}: ({{ point.x }}, {{ point.y }})
+        <button class="toggle-marker" data-index="{{ forloop.counter0 }}">Show</button>
+      </li>
       {% endfor %}
     </ul>
   </body>
@@ -123,13 +126,50 @@
           }
   
           // Draw a circle for each point
-          pointsData.forEach(function(pt) {
+          pointsData.forEach(function(pt, index) {
               var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
               circle.setAttribute("cx", pt.x);
               circle.setAttribute("cy", pt.y);
               circle.setAttribute("r", 5);
               circle.setAttribute("class", "marker");
+
+              // Initially set marker color to red
+              //circle.setAttribute("fill", "red");
+              //circle.setAttribute("stroke", "darkred");
+              circle.style.fill = "red";
+              circle.style.stroke = "darkred";
+
+              circle.setAttribute("data-index", index);
+
               svg.appendChild(circle);
+          });
+
+          document.querySelectorAll('.toggle-marker').forEach(function(button) {
+              button.addEventListener('click', function() {
+                var idx = button.getAttribute('data-index');
+                var marker = svg.querySelector('circle[data-index="' + idx + '"]');
+                if(marker){
+                  //var currentColor = marker.getAttribute("fill");
+                  var currentColor = marker.style.fill;
+                  if(currentColor === "red") {
+                    //marker.setAttribute("fill", "green");
+                    //marker.setAttribute("stroke", "darkgreen");
+
+                    marker.style.fill = "green";
+                    marker.style.stroke = "darkgreen";
+
+                    button.textContent = "Hide";
+                  } else{
+                    //marker.setAttribute("fill", "red");
+                    //marker.setAttribute("stroke", "darkred");
+
+                    marker.style.fill = "red";
+                    marker.style.stroke = "darkred";
+
+                    button.textContent = "Show";
+                  }
+                }
+              });
           });
       }
     </script>

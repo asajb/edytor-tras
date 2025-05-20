@@ -1,0 +1,95 @@
+{% load grid_extras %}
+{% load static %}
+
+<html>
+  <head>
+    <title>Edit Grid - {{ grid.title }}</title>
+    <style>
+      table.grid {
+        border-collapse: collapse;
+      }
+      table.grid td {
+        width: 50px;
+        height: 50px;
+        border: 1px solid #ccc;
+        text-align: center;
+        vertical-align: middle;
+        position: relative;
+      }
+      .dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Edit Grid: {{ grid.title }}</h1>
+    
+    <!-- Render the grid -->
+    <table class="grid">
+      {% for i in grid.rows|make_range %}
+        <tr>
+          {% for j in grid.cols|make_range %}
+            <td data-row="{{ i }}" data-col="{{ j }}">
+              {% for dot in grid.dots %}
+                {% comment %}Assuming each dot dict has keys "row", "col", and "color"{% endcomment %}
+                {% if dot.row == i and dot.col == j %}
+                  <div class="dot" style="background-color: {{ dot.color }};"></div>
+                {% endif %}
+              {% endfor %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+
+    <label for="default-color">Select Default Color:</label>
+      <select id="default-color" name="default_color">
+        <option value="#FF0000">Red</option>
+        <option value="#00FF00">Green</option>
+        <option value="#0000FF">Blue</option>
+        <option value="#FFFF00">Yellow</option>
+        <option value="#FF00FF">Magenta</option>
+        <option value="#00FFFF">Cyan</option>
+      </select>
+
+    
+    <form method="POST">
+      {% csrf_token %}
+      {{ dots_formset.management_form }}
+      <table>
+        <tbody id="formset-table-body">
+          {% for form in dots_formset %}
+            <tr>
+              <td>{{ form.row }}</td>
+              <td>{{ form.col }}</td>
+              <td>{{ form.color }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <button type="submit">Save Grid</button>
+    </form>
+    <!-- Hidden template for new forms -->
+    <div id="empty-form" style="display:none;">
+      <table>
+        <tbody>
+          <tr>
+            <td>{{ dots_formset.empty_form.row }}</td>
+            <td>{{ dots_formset.empty_form.col }}</td>
+            <td>{{ dots_formset.empty_form.color }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script src="{% static 'js/addDotsGrid.js' %}" defer></script>
+  </body>
+</html>

@@ -1,3 +1,4 @@
+{% load static %}
 <html>
   <head>
     <style>
@@ -109,7 +110,7 @@
       </tr>
     </div>
     <script>
-      // Grab the management form TOTAL_FORMS input
+      /*// Grab the management form TOTAL_FORMS input
       var totalForms = document.getElementById("id_form-TOTAL_FORMS");
       var formIdx = parseInt(totalForms.value);
       
@@ -124,7 +125,8 @@
         // Increase form count
         formIdx++;
         totalForms.value = formIdx;
-      });
+      });*/
     </script>
+    <script src="{% static 'js/dynamicPointsAdd.js' %}" defer></script>
   </body>
 </html>

@@ -1,0 +1,65 @@
+{% load grid_extras %}
+{% load static %}
+
+<html>
+  <head>
+    <title>Make Paths on Grid - {{ grid.title }}</title>
+    <style>
+      table.grid {
+        border-collapse: collapse;
+      }
+      table.grid td {
+        width: 50px;
+        height: 50px;
+        border: 1px solid #ccc;
+        text-align: center;
+        vertical-align: middle;
+        position: relative;
+      }
+      .dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: auto;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 2;
+      }
+      .selected {
+        outline: 3px solid #222;
+        z-index: 3;
+      }
+      .path-cell {
+        /* Will be colored dynamically */
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Grid: {{ grid.title }}</h1>
+    <table id="grid-table" class="grid">
+      {% for i in grid.rows|make_range %}
+        <tr>
+        {% for j in grid.cols|make_range %}
+          <td data-row="{{ i }}" data-col="{{ j }}">
+            {% for dot in grid.dots %}
+              {% if dot.row == i and dot.col == j %}
+                <div class="dot"
+                     data-row="{{ dot.row }}"
+                     data-col="{{ dot.col }}"
+                     data-color="{{ dot.color }}"
+                     style="background-color: {{ dot.color }}; cursor:pointer;">
+                </div>
+              {% endif %}
+            {% endfor %}
+          </td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+
+    <button id="submit-paths" type="button">Submit Paths</button>
+
+    <script src="{% static 'js/createPathsOnGrid.js' %}" defer></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <title>Create Grid</title>
+  </head>
+  <body>
+    <h1>Create Grid</h1>
+    <form method="POST">
+      {% csrf_token %}
+      {{ grid_form.as_p }}
+      <button type="submit">Create Grid</button>
+    </form>
+  </body>
+</html>
