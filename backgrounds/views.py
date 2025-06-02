@@ -5,9 +5,20 @@ from .forms import GridForm, DotForm
 from .models import GameBoard, UserPath, PathsOnBoard
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ValidationError
-import json
-from django.http import JsonResponse
+import json, time
+from django.http import JsonResponse, StreamingHttpResponse
+from threading import Lock
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 # Create your views here.
+
+_events: list[str] = []
+_lock = Lock()
+
+def _enqueue(event: str):
+    with _lock:
+        _events.append(event)
+
 
 @login_required
 def create_grid(request):
@@ -145,3 +156,45 @@ def show_paths_on_grid(request, grid_id, path_id):
         'paths_on_board': paths_on_board,
         'grid_cells': grid_cells,
     })
+
+
+def sse_notifications(request):
+    def event_stream():
+        while True:
+            with _lock:
+                if _events:
+                    yield _events.pop(0)
+                    continue
+
+            yield 'keep-alive\n\n'
+            time.sleep(15)
+
+    return StreamingHttpResponse(
+        event_stream(),
+        content_type='text/event-stream'
+    )
+
+
+@receiver(post_save, sender=GameBoard)
+def on_new_board(sender, instance: GameBoard, created, **kwargs):
+    if not created:
+        return
+    payload = {
+        "board_id": instance.id,
+        "board_name": instance.title,
+        "creator_username": instance.user.username
+    }
+    msg = f"event: newBoard\ndata: {json.dumps(payload)}\n\n"
+    _enqueue(msg)
+
+@receiver(post_save, sender=PathsOnBoard)
+def on_new_paths_on_board(sender, instance: PathsOnBoard, created, **kwargs):
+    if not created:
+        return
+    payload = {
+        "paths_on_board_id": instance.id,
+        "board_id": instance.board.id,
+        "user_username": instance.user.username
+    }
+    msg = f"event: newPathsOnBoard\ndata: {json.dumps(payload)}\n\n"
+    _enqueue(msg)
