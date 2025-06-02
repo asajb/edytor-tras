@@ -10,14 +10,16 @@ from django.http import JsonResponse, StreamingHttpResponse
 from threading import Lock
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from collections import deque
 # Create your views here.
 
-_events: list[str] = []
+_clients: list[deque[str]] = []
 _lock = Lock()
 
-def _enqueue(event: str):
+def _broadcast(msg: str):
     with _lock:
-        _events.append(event)
+        for q in _clients:
+            q.append(msg)
 
 
 @login_required
@@ -160,19 +162,25 @@ def show_paths_on_grid(request, grid_id, path_id):
 
 def sse_notifications(request):
     def event_stream():
-        while True:
+        q = deque()
+        with _lock:
+            _clients.append(q)
+        try:
+            while True:
+                if q:
+                    yield q.popleft()
+                else:
+                    yield ": keep-alive\n\n"
+                    time.sleep(15)
+        finally:
             with _lock:
-                if _events:
-                    yield _events.pop(0)
-                    continue
+                _clients.remove(q)
 
-            yield 'keep-alive\n\n'
-            time.sleep(15)
-
-    return StreamingHttpResponse(
-        event_stream(),
-        content_type='text/event-stream'
-    )
+    resp = StreamingHttpResponse(event_stream(),
+                                 content_type='text/event-stream')
+    resp["Cache-Control"] = "no-cache"
+    resp["X-Accel-Buffering"] = "no"
+    return resp
 
 
 @receiver(post_save, sender=GameBoard)
@@ -185,7 +193,7 @@ def on_new_board(sender, instance: GameBoard, created, **kwargs):
         "creator_username": instance.user.username
     }
     msg = f"event: newBoard\ndata: {json.dumps(payload)}\n\n"
-    _enqueue(msg)
+    _broadcast(msg)
 
 @receiver(post_save, sender=PathsOnBoard)
 def on_new_paths_on_board(sender, instance: PathsOnBoard, created, **kwargs):
@@ -194,7 +202,8 @@ def on_new_paths_on_board(sender, instance: PathsOnBoard, created, **kwargs):
     payload = {
         "paths_on_board_id": instance.id,
         "board_id": instance.board.id,
+        "board_name": instance.board.title,
         "user_username": instance.user.username
     }
     msg = f"event: newPathsOnBoard\ndata: {json.dumps(payload)}\n\n"
-    _enqueue(msg)
+    _broadcast(msg)

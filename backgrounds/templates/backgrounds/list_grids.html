@@ -1,3 +1,4 @@
+{% load static %}
 <html>
   <head>
     <title>List of Grids</title>
@@ -31,5 +32,9 @@
         <li>No paths on boards found.</li>
       {% endfor %}
     </ul>
+    <script>
+      window.SSE_URL = "{% url 'sse_notifications' %}";
+    </script>
+    <script src="{% static 'js/sseNotifications.js' %}" defer></script>
   </body>
 </html>
